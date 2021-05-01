@@ -78,7 +78,7 @@ my $data_all = "";
 foreach my $date ( sort { $a cmp $b } keys %data_all ) {
   foreach my $center_id ( sort { $a <=> $b } keys %{$data_all{$date}} ) {
     my ( $state_name, $district_name, $block_name, $pincode, $fee_type, $min_age_limit, $available ) = @{$data_all{$date}{$center_id}};
-    my $line = "$date,$state_name,$district_name,$block_name,$center_id,$pincode,$block_name,$fee_type,$min_age_limit,$available\n";
+    my $line = "$date,$state_name,$district_name,$block_name,$pincode,$fee_type,$min_age_limit,$available\n";
     print $line;
     $data_all .= $line;
   }
@@ -88,13 +88,14 @@ my $data_18plus = "";
 foreach my $date ( sort { $a cmp $b } keys %data_18plus ) {
   foreach my $center_id ( sort { $a <=> $b } keys %{$data_18plus{$date}} ) {
     my ( $state_name, $district_name, $block_name, $pincode, $fee_type, $min_age_limit, $available ) = @{$data_18plus{$date}{$center_id}};
-    my $line = "$date,$state_name,$district_name,$block_name,$center_id,$pincode,$block_name,$fee_type,$min_age_limit,$available\n";
+    my $line = "$date,$state_name,$district_name,$block_name,$pincode,$fee_type,$min_age_limit,$available\n";
     print $line;
     $data_18plus .= $line;
   }
 }
 
 my $subject = "List of open slots at various centers.";
+my $header = "Date,State,District,Block,Pincode,FeeType,MinAgeLimit,Available\n";
 my $email_data = $data_all;
 if ( %data_18plus ) {
   $subject = "ALERT: Registration open for 18+";
