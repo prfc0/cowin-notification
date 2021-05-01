@@ -9,20 +9,20 @@ use JSON::XS;
 use Getopt::Long;
 
 my $send_email;
-my @district_ids;
+my $district_ids;
 my $gmail_creds_file;
 my $to_email;
 my $verbose;
 
 GetOptions(
   "send_email!" => \$send_email,
-  "district_ids=s@" => \@district_ids,
+  "district_ids=s" => \$district_ids,
   "gmail_creds_file=s" => \$gmail_creds_file,
   "to_email=s" => \$to_email,
   "verbose!" => \$verbose,
 );
 
-die "Please provide district ids to parse data using --distrcit_ids option.\n" unless @district_ids;
+die "Please provide district ids to parse data using --distrcit_ids option.\n" unless $district_ids;
 die "Please provide gmail credentials file using --gmail_creds_file option.\n" unless $gmail_creds_file;
 die "Please provide to email using --to_email option.\n" unless $to_email;
 
@@ -33,6 +33,7 @@ my %data_all;
 my %data_18plus;
 
 my @dates = get_dates();
+my @district_ids = split( /,/, $district_ids );
 
 foreach my $date ( @dates ) {
   foreach my $district_id ( @district_ids ) {
