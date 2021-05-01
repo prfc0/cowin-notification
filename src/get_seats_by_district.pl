@@ -10,23 +10,20 @@ use Getopt::Long;
 
 my $send_email;
 my @district_ids;
-my $from_email;
-my $email_password;
+my $gmail_creds_file;
 my $to_email;
 my $verbose;
 
 GetOptions(
   "send_email!" => \$send_email,
   "district_ids=s@" => \@district_ids,
-  "from_email=s" => \$from_email,
-  "email_password=s" => \$email_password,
+  "gmail_creds_file=s" => \$gmail_creds_file,
   "to_email=s" => \$to_email,
   "verbose!" => \$verbose,
 );
 
 die "Please provide district ids to parse data using --distrcit_ids option.\n" unless @district_ids;
-die "Please provide from email id(gmail) using --from_email option.\n" unless $from_email;
-die "Please provide email password using --email_password option.\n" unless $email_password;
+die "Please provide gmail credentials file using --gmail_creds_file option.\n" unless $gmail_creds_file;
 die "Please provide to email using --to_email option.\n" unless $to_email;
 
 #my $top_url = "https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/calendarByDistrict?";
@@ -101,6 +98,17 @@ if ( %data_18plus ) {
   $subject = "ALERT: Registration open for 18+";
   $email_data = $data_18plus;
 }
+
+my $creds_content;
+{
+  local $/ = undef;
+  open( my $fh, $gmail_creds_file ) or die "$gmail_creds_file : $!";
+  $creds_content = <$fh>;
+  close( $fh );
+}
+my $creds_data = decode_json( $creds_content );
+my $from_email = $creds_data->{email_id};
+my $email_password = $creds_data->{password};
 
 if ( %data_18plus or $send_email ) {
   my ( $mail, $error ) = Email::Send::SMTP::Gmail->new(
