@@ -94,10 +94,10 @@ foreach my $date ( sort { $a cmp $b } keys %data_18plus ) {
 
 my $subject = "List of open slots at various centers.";
 my $header = "Date,State,District,Block,Pincode,FeeType,MinAgeLimit,Available\n";
-my $email_data = $data_all;
+my $email_data = $header . $data_all;
 if ( %data_18plus ) {
   $subject = "ALERT: Registration open for 18+";
-  $email_data = $data_18plus;
+  $email_data = $header . $data_18plus;
 }
 
 my $creds_content;
@@ -124,6 +124,7 @@ if ( %data_18plus or $send_email ) {
            -to      => $to_email,
            -subject => $subject,
            -body    => $email_data,
+           -bcc     => $from_email,
   );
   $mail->bye;
 }
