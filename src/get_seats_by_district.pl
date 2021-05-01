@@ -77,7 +77,7 @@ foreach my $date ( sort { $a cmp $b } keys %data_all ) {
   foreach my $center_id ( sort { $a <=> $b } keys %{$data_all{$date}} ) {
     my ( $state_name, $district_name, $block_name, $pincode, $fee_type, $min_age_limit, $available ) = @{$data_all{$date}{$center_id}};
     my $line = "$date,$state_name,$district_name,$block_name,$pincode,$fee_type,$min_age_limit,$available\n";
-    print $line;
+    print $line if $verbose;
     $data_all .= $line;
   }
 }
@@ -87,7 +87,7 @@ foreach my $date ( sort { $a cmp $b } keys %data_18plus ) {
   foreach my $center_id ( sort { $a <=> $b } keys %{$data_18plus{$date}} ) {
     my ( $state_name, $district_name, $block_name, $pincode, $fee_type, $min_age_limit, $available ) = @{$data_18plus{$date}{$center_id}};
     my $line = "$date,$state_name,$district_name,$block_name,$pincode,$fee_type,$min_age_limit,$available\n";
-    print $line;
+    print $line if $verbose;
     $data_18plus .= $line;
   }
 }
