@@ -63,20 +63,32 @@ foreach my $date ( @dates ) {
         my $min_age_limit = $session->{min_age_limit};
         my $date = $session->{date};
         my $available = $session->{available_capacity};
-        $data_all{$date}{$center_id} = [ $state_name, $district_name, $block_name, $pincode, $fee_type, $min_age_limit, $available ];
+        $data_all{$date}{$center_id} = [ $state_name, $district_name, $block_name, $name, $pincode, $fee_type, $min_age_limit, $available ];
         if ( $min_age_limit != 45 and $available > 0 ) {
-          $data_18plus{$date}{$center_id} = [ $state_name, $district_name, $block_name, $pincode, $fee_type, $min_age_limit, $available ];
+          $data_18plus{$date}{$center_id} = [ $state_name, $district_name, $block_name, $name, $pincode, $fee_type, $min_age_limit, $available ];
         }
       }
     }
   }
 }
 
+my $style = "border: 1px solid black; border-collapse: collapse;";
 my $data_all = "";
 foreach my $date ( sort { $a cmp $b } keys %data_all ) {
   foreach my $center_id ( sort { $a <=> $b } keys %{$data_all{$date}} ) {
-    my ( $state_name, $district_name, $block_name, $pincode, $fee_type, $min_age_limit, $available ) = @{$data_all{$date}{$center_id}};
-    my $line = "$date,$state_name,$district_name,$block_name,$pincode,$fee_type,$min_age_limit,$available\n";
+    my ( $state_name, $district_name, $block_name, $center_name, $pincode, $fee_type, $min_age_limit, $available ) = @{$data_all{$date}{$center_id}};
+    #my $line = "$date,$state_name,$district_name,$block_name,$pincode,$fee_type,$min_age_limit,$available\n";
+    my $line = "<tr style=\"$style\">".
+               "<td style=\"$style\" nowrap>$date</td>".
+               "<td style=\"$style\">$state_name</td>".
+               "<td style=\"$style\">$district_name</td>".
+               "<td style=\"$style\">$block_name</td>".
+               "<td style=\"$style\" nowrap>$center_name</td>".
+               "<td style=\"$style\">$pincode</td>".
+               "<td style=\"$style\">$fee_type</td>".
+               "<td style=\"$style\">$min_age_limit</td>".
+               "<td style=\"$style\">$available</td>".
+               "</tr>\n";
     print $line if $verbose;
     $data_all .= $line;
   }
@@ -85,20 +97,45 @@ foreach my $date ( sort { $a cmp $b } keys %data_all ) {
 my $data_18plus = "";
 foreach my $date ( sort { $a cmp $b } keys %data_18plus ) {
   foreach my $center_id ( sort { $a <=> $b } keys %{$data_18plus{$date}} ) {
-    my ( $state_name, $district_name, $block_name, $pincode, $fee_type, $min_age_limit, $available ) = @{$data_18plus{$date}{$center_id}};
-    my $line = "$date,$state_name,$district_name,$block_name,$pincode,$fee_type,$min_age_limit,$available\n";
+    my ( $state_name, $district_name, $block_name, $center_name, $pincode, $fee_type, $min_age_limit, $available ) = @{$data_18plus{$date}{$center_id}};
+    #my $line = "$date,$state_name,$district_name,$block_name,$pincode,$fee_type,$min_age_limit,$available\n";
+    my $line = "<tr style=\"$style\">".
+               "<td style=\"$style\" nowrap>$date</td>".
+               "<td style=\"$style\">$state_name</td>".
+               "<td style=\"$style\">$district_name</td>".
+               "<td style=\"$style\">$block_name</td>".
+               "<td style=\"$style\" nowrap>$center_name</td>".
+               "<td style=\"$style\">$pincode</td>".
+               "<td style=\"$style\">$fee_type</td>".
+               "<td style=\"$style\">$min_age_limit</td>".
+               "<td style=\"$style\">$available</td>".
+               "</tr>\n";
     print $line if $verbose;
     $data_18plus .= $line;
   }
 }
 
 my $subject = "List of open slots at various centers.";
-my $header = "Date,State,District,Block,Pincode,FeeType,MinAgeLimit,Available\n";
+#my $header = "Date,State,District,Block,Pincode,FeeType,MinAgeLimit,Available\n";
+my $header = "Book your slot at https://selfregistration.cowin.gov.in/<br><br>".
+             "<table style=\"$style\">\n".
+             "<tr style=\"$style\">".
+             "<th style=\"$style\">Date</th>".
+             "<th style=\"$style\">State</th>".
+             "<th style=\"$style\">District</th>".
+             "<th style=\"$style\">Block</th>".
+             "<th style=\"$style\">Center</th>".
+             "<th style=\"$style\">Pincode</th>".
+             "<th style=\"$style\">FeeType</th>".
+             "<th style=\"$style\">Age+</th>".
+             "<th style=\"$style\">Available</th>".
+             "</tr>\n";
 my $email_data = $header . $data_all;
 if ( %data_18plus ) {
-  $subject = "ALERT: Registration open for 18+";
+  $subject = "ALERT: Vaccine registration open for 18+";
   $email_data = $header . $data_18plus;
 }
+$email_data .= "</table>";
 
 my $creds_content;
 {
@@ -125,6 +162,7 @@ if ( %data_18plus or $send_email ) {
            -subject => $subject,
            -body    => $email_data,
            -bcc     => $from_email,
+           -contenttype => "text/html",
   );
   $mail->bye;
 }
