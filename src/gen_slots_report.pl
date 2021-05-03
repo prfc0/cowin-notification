@@ -7,13 +7,16 @@ use Getopt::Long;
 use JSON::XS;
 
 my $data_dir;
+my $report_file;
 GetOptions(
   "data_dir=s" => \$data_dir,
+  "report_file=s" => \$report_file,
 );
 
 die "Please provide data directory using --data_dir option.\n" unless $data_dir;
 
-print "State,District,Date,Block,Center,Pincode,FeeType,Vaccine,AgeLimit,Available\n";
+open( my $ofh, ">", $report_file ) or die "$report_file: $!";
+print $ofh "State,District,Date,Block,Center,Pincode,FeeType,Vaccine,AgeLimit,Available\n";
 opendir( DIR, $data_dir ) or die "$data_dir: $!";
 while( my $json_file = readdir( DIR ) ) {
   next unless $json_file =~ /^(\d+)\.json$/;
@@ -46,9 +49,10 @@ while( my $json_file = readdir( DIR ) ) {
       my $vaccine = $session->{vaccine};
       my $date = $session->{date};
       if ( $min_age_limit != 45 ) {
-        print qq("$state_name","$district_name",$date,"$block_name","$name",$pincode,$fee_type,$vaccine,$min_age_limit,$available_capacity\n);
+        print $ofh qq("$state_name","$district_name",$date,"$block_name","$name",$pincode,$fee_type,$vaccine,$min_age_limit,$available_capacity\n);
       }
     }
   }
 }
 closedir( DIR );
+close( $ofh );
