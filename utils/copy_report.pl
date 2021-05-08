@@ -5,11 +5,15 @@ use warnings;
 
 use Getopt::Long;
 
-my ( $data_dir, $web_dir );
+my $data_dir;
+my $web_dir;
 GetOptions(
   "data_dir=s" => \$data_dir,
   "web_dir=s" => \$web_dir,
 );
+
+die "Please provide directory from where to copy data using --data_dir option.\n" unless $data_dir;
+die "Please provide web directory where to copy data to using --web_dir option.\n" unless $web_dir;
 
 my $latest_file = "";
 opendir( DIR, $data_dir ) or die "$data_dir: $!";
