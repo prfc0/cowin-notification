@@ -35,12 +35,6 @@ close( $fh );
 
 my $config_file = "$COWIN_HOME/data/district_user_mapping.json";
 
-my $config_data = get_config_data( $config_file );
-my @notification_configs = @{$config_data->{configs}};
-
-my @districts_to_monitor = get_unique_districts( $config_data );
-my @dates = get_dates( 1 );
-
 my $ua = LWP::UserAgent->new();
 
 my %prev_data;
@@ -76,8 +70,16 @@ my $email_password = $creds_data->{password};
 
 my %events;
 my $first_run = 1;
+
+my @notification_configs;
 while( 1 ) {
-  my %data = get_district_data( @districts_to_monitor );
+  my $config_data = get_config_data( $config_file );
+  @notification_configs = @{$config_data->{configs}};
+
+  my @districts_to_monitor = get_unique_districts( $config_data );
+  my @dates = get_dates( 1 );
+
+  my %data = get_district_data( \@districts_to_monitor, \@dates );
 
   my @mail_data;
   foreach my $date ( sort { $a cmp $b } keys %data ) {
@@ -238,12 +240,12 @@ sub get_date_time {
 }
 
 sub get_district_data {
-  my ( @districts ) = @_;
+  my ( $districts, $dates ) = @_;
 
   my %data;
-  foreach my $district_id ( @districts ) {
+  foreach my $district_id ( @$districts ) {
     my $district_url = "$calendar_by_district_url?district_id=$district_id";
-    foreach my $date ( @dates ) {
+    foreach my $date ( @$dates ) {
       my $url .= "$district_url&date=$date";
       my $result = $ua->get( $url );
       if ( not $result->is_success ) {
