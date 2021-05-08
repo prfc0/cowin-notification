@@ -5,10 +5,18 @@ use warnings;
 
 use Data::Dumper;
 use JSON::XS;
+use LWP::UserAgent;
+
+my $ua = LWP::UserAgent->new();
+$ua->timeout( 10 );
 
 my $api_url = "https://api.cowin.gov.in/api/v2";
 my $get_states_url = "$api_url/admin/location/states";
-chomp( my $states_op = `curl $get_states_url 2>/dev/null` );
+my $response = $ua->get( $get_states_url );
+if ( not $response->is_success ) {
+  die $response->status_line;
+}
+my $states_op = $response->decoded_content;
 
 my %data;
 my $states_data = decode_json( $states_op );
@@ -16,7 +24,11 @@ foreach my $state ( @{$states_data->{states}} ) {
     my $state_id = $state->{state_id};
     my $state = $state->{state_name};
     my $get_districts_url = "$api_url/admin/location/districts/$state_id";
-    chomp( my $content = `curl $get_districts_url 2>/dev/null` );
+    my $response = $ua->get( $get_districts_url );
+    if ( not $response->is_success ) {
+      die $response->status_line;
+    }
+    my $content = $response->decoded_content;
     my $data = decode_json( $content );
     $data{$state}{state_id} = $state_id;
     foreach my $district ( @{$data->{districts}} ) {
