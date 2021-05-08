@@ -6,7 +6,10 @@ use warnings;
 use FindBin qw($Bin);
 use Getopt::Long;
 use JSON::XS;
+use LWP::UserAgent;
 use Time::HiRes qw(usleep nanosleep);
+
+my $ua = LWP::UserAgent->new();
 
 my $cowin_url = "https://api.cowin.gov.in/api/v2";
 my $calendar_api_url = "$cowin_url/appointment/sessions/public/calendarByDistrict";
@@ -46,8 +49,10 @@ foreach my $district_id ( sort { $district_ids{$a}{sort_key} cmp $district_ids{$
     my $state = $district_ids{$district_id}{state};
     my $district = $district_ids{$district_id}{district};
     print "$count/$total : $state/$district : $district_id\n";
-    my $cmd = "curl '$calendar_api_url?district_id=$district_id&date=$date'";
-    system( "$cmd > $log_dir/$date_dir/$district_id.json 2>/dev/null" );
+    my $result = $ua->get("$calendar_api_url?district_id=$district_id&date=$date");
+    open( my $ofh, ">", "$log_dir/$date_dir/$district_id.json" ) or die $!;
+    print $ofh $result->content();
+    close( $ofh );
     usleep(100);
     $count++;
 }
