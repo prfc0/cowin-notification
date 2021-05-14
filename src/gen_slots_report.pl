@@ -8,9 +8,11 @@ use JSON::XS;
 
 my $data_dir;
 my $report_file;
+my $scp_server;
 GetOptions(
   "data_dir=s" => \$data_dir,
   "report_file=s" => \$report_file,
+  "scp_server=s" => \$scp_server,
 );
 
 die "Please provide data directory using --data_dir option.\n" unless $data_dir;
@@ -56,3 +58,8 @@ while( my $json_file = readdir( DIR ) ) {
 }
 closedir( DIR );
 close( $ofh );
+
+if ( $scp_server ) {
+  my $scp_cmd = "scp $report_file $scp_server:$ENV{COWIN_HOME}/data";
+  system( $scp_cmd );
+}
