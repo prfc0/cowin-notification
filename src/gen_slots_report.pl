@@ -25,8 +25,8 @@ while( my $json_file = readdir( DIR ) ) {
   {
      local $/ = undef;
      open( my $fh, "$data_dir/$json_file" ) or die "$data_dir/$json_file : $!";
-       $content = <$fh>;
-       close( $fh );
+     $content = <$fh>;
+     close( $fh );
   }
   next unless $content;
   my $data = decode_json( $content );
@@ -48,7 +48,7 @@ while( my $json_file = readdir( DIR ) ) {
       my $min_age_limit = $session->{min_age_limit};
       my $vaccine = $session->{vaccine};
       my $date = $session->{date};
-      if ( $min_age_limit != 45 ) {
+      if ( $min_age_limit < 45 and $available_capacity > 0 ) {
         print $ofh qq("$state_name","$district_name",$date,"$block_name","$name",$pincode,$fee_type,$vaccine,$min_age_limit,$available_capacity\n);
       }
     }
